@@ -1,5 +1,31 @@
 # MedSupply｜醫療耗材庫存管理系統
 
+> **一句話介紹：** 醫院護理師用來查詢耗材庫存、登記領用的管理系統，耗材快用完或快過期時會自動提醒。
+
+## 畫面預覽
+
+**儀表板**：各分類庫存金額、低庫存與效期預警、各單位領用量排行
+
+![儀表板](docs/screenshots/dashboard.png)
+
+**耗材清單**：依料號或名稱搜尋，可篩選分類與低庫存品項
+
+![耗材清單](docs/screenshots/list.png)
+
+**耗材明細**：基本資料、廠商、入庫／出庫，以及每一筆異動紀錄
+
+![耗材明細](docs/screenshots/detail.png)
+
+## 技術亮點
+
+- **Python Flask + PostgreSQL**：SQLAlchemy ORM，以 Alembic Migration 管理每一次資料表結構變更
+- **SQL 效能優化**：以 50 萬筆測試資料做 `EXPLAIN ANALYZE` 分析，建立索引後查詢時間由 110 ms 降至 0.08 ms
+- **資料一致性**：庫存只能透過入出庫異動變更；出庫以條件式 UPDATE 防止同時領用時扣成負數
+- **可追蹤的錯誤處理**：每個請求都有追蹤碼，寫入日誌並回傳給使用者
+- **28 個自動化測試**（pytest）
+
+---
+
 以 ERP「庫存管理模組」為原型，改用 **Python Flask** 重新實作，套用在醫院耗材管理情境。
 
 | 功能 | 內容 |
@@ -9,7 +35,7 @@
 | 庫存 | 入庫、出庫、異動紀錄、庫存不足檢查（條件式 UPDATE 防止扣成負數） |
 | 儀表板 | 分類庫存金額、低於安全庫存、效期預警、各單位領用量排行 |
 | REST API | Bearer Token 驗證、統一 JSON 錯誤格式、統計 API |
-| 維運 | 資料庫 Migration、請求日誌、request_id 錯誤追蹤、pytest 27 個測試 |
+| 維運 | 資料庫 Migration、請求日誌、request_id 錯誤追蹤、pytest 28 個測試 |
 
 技術：Flask 3、Flask-SQLAlchemy（ORM）、Flask-Login、Flask-Migrate（Alembic）、PostgreSQL（psycopg 3；也可用 SQLite / MySQL / SQL Server）、pytest
 
