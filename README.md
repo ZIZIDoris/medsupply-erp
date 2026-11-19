@@ -11,35 +11,87 @@
 | REST API | Bearer Token 驗證、統一 JSON 錯誤格式、統計 API |
 | 維運 | 資料庫 Migration、請求日誌、request_id 錯誤追蹤、pytest 27 個測試 |
 
-技術：Flask 3、Flask-SQLAlchemy（ORM）、Flask-Login、Flask-Migrate（Alembic）、SQLite（可換 MySQL / SQL Server / PostgreSQL）、pytest
+技術：Flask 3、Flask-SQLAlchemy（ORM）、Flask-Login、Flask-Migrate（Alembic）、PostgreSQL（psycopg 3；也可用 SQLite / MySQL / SQL Server）、pytest
 
 ---
 
 ## 快速開始
 
+預設資料庫為 **PostgreSQL**（在 `.env` 設定 `DATABASE_URL`）。沒有設定 `DATABASE_URL` 時，會自動改用 SQLite 檔案 `instance/medsupply.db`，詳見[使用 SQLite](#使用-sqlite不用裝資料庫)。
+
 ```bash
-# 1. 建立虛擬環境並安裝套件
+# 1. 建立虛擬環境並安裝套件（已包含 PostgreSQL 驅動 psycopg）
 python -m venv .venv
 source .venv/bin/activate          # Windows：.venv\Scripts\activate
 pip install -r requirements.txt
 
-# 2. 建立資料表（依 migrations/ 內的版本）
+# 2. 設定連線：複製 .env.example 為 .env，修改 DATABASE_URL 的帳號密碼
+#    DATABASE_URL=postgresql+psycopg://postgres:<密碼>@localhost:5432/medsupply
+#    （.env 已列在 .gitignore，不會被 commit）
+
+# 3. 建立資料表（依 migrations/ 內的版本）
 flask db upgrade
 
-# 3. 建立測試帳號與範例資料
+# 4. 建立測試帳號與範例資料
 flask seed
 
-# 4. 啟動
+# 5. 啟動
 flask run
 ```
 
 打開 http://127.0.0.1:5000 ，用 `admin / admin1234`（管理員）或 `nurse01 / nurse1234`（一般使用者）登入。
+
+確認目前連到哪種資料庫：
+
+```bash
+curl -s localhost:5000/api/v1/health
+# {"status": "ok", "database": "postgresql"}
+```
 
 執行測試：
 
 ```bash
 pytest -v
 ```
+
+> 測試使用 `TestConfig`，固定連到 SQLite 記憶體資料庫（`sqlite:///:memory:`），每個測試都是全新的資料庫，不會動到 PostgreSQL 裡的資料。
+
+---
+
+## PostgreSQL 免安裝版（Windows zip）
+
+不想執行安裝程式時，可以下載 PostgreSQL 的 Windows zip 版，解壓縮後直接使用。以下假設程式在 `C:\pgsql\bin`、資料放在 `C:\pgdata`（路徑可自行更換）。
+
+**第一次：初始化資料目錄**（只做一次）
+
+```powershell
+# -U 超級使用者名稱、-E 編碼、-W 會提示輸入密碼、--auth 要求連線時驗證密碼
+C:\pgsql\bin\initdb.exe -D C:\pgdata -U postgres -E UTF8 --locale=C -W --auth=scram-sha-256
+```
+
+**啟動 / 停止伺服器**
+
+```powershell
+# 啟動（-l 指定日誌檔，啟動失敗時可看這個檔案找原因）
+C:\pgsql\bin\pg_ctl.exe -D C:\pgdata -l C:\pgdata\server.log start
+
+# 查看狀態 / 停止
+C:\pgsql\bin\pg_ctl.exe -D C:\pgdata status
+C:\pgsql\bin\pg_ctl.exe -D C:\pgdata stop
+
+# 確認是否在 5432 port 接受連線
+C:\pgsql\bin\pg_isready.exe -h localhost -p 5432
+```
+
+**建立資料庫**（只做一次）
+
+```powershell
+C:\pgsql\bin\createdb.exe -h localhost -U postgres -E UTF8 medsupply
+```
+
+接著回到[快速開始](#快速開始)的步驟 2，設定 `.env` 後執行 `flask db upgrade`、`flask seed`。
+
+> 密碼若含 `@ : / # ? %` 等特殊字元，放進 `DATABASE_URL` 時要做 URL 編碼，例如 `@` 寫成 `%40`、`#` 寫成 `%23`。
 
 ---
 
@@ -119,11 +171,31 @@ curl -s -X POST localhost:5000/api/v1/items/1/transactions \
 
 ---
 
-## 換成其他資料庫
+## 使用 SQLite（不用裝資料庫）
 
-複製 `.env.example` 為 `.env`，設定 `DATABASE_URL`，安裝對應驅動後執行 `flask db upgrade`：
+SQLite 內建在 Python 裡，不必另外安裝資料庫伺服器，適合快速試用。只要 `.env` **不設定** `DATABASE_URL`（把那一行刪掉或在前面加 `#` 註解掉），程式就會使用 `instance/medsupply.db`：
 
 ```bash
+# .env
+# DATABASE_URL=postgresql+psycopg://postgres:<密碼>@localhost:5432/medsupply
+
+flask db upgrade
+flask seed
+flask run
+```
+
+此時 `/api/v1/health` 會回傳 `"database": "sqlite"`。
+
+---
+
+## 換成其他資料庫
+
+在 `.env` 設定 `DATABASE_URL`，安裝對應驅動後執行 `flask db upgrade`：
+
+```bash
+# PostgreSQL（預設，驅動已在 requirements.txt）
+DATABASE_URL=postgresql+psycopg://user:pass@localhost:5432/medsupply
+
 # SQL Server
 pip install pyodbc
 DATABASE_URL=mssql+pyodbc://user:pass@localhost/medsupply?driver=ODBC+Driver+18+for+SQL+Server&TrustServerCertificate=yes
@@ -133,7 +205,8 @@ pip install PyMySQL
 DATABASE_URL=mysql+pymysql://user:pass@localhost:3306/medsupply?charset=utf8mb4
 ```
 
-程式碼完全不用改
+程式碼完全不用改：`app/config.py` 從環境變數讀取 `DATABASE_URL`，SQLAlchemy 依網址前綴自動選擇對應的資料庫方言與驅動。
+
 ---
 
 ## 用 Codex CLI 繼續擴充
