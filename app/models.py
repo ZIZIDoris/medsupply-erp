@@ -130,7 +130,7 @@ class StockTransaction(db.Model):
     balance_after = db.Column(db.Integer, nullable=False)  # 異動後結存
     department = db.Column(db.String(50))  # 領用 / 進貨單位，例如 急診、5A 病房
     note = db.Column(db.String(200))
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, index=True)
     created_at = db.Column(
         db.DateTime, nullable=False, default=datetime.now, index=True
     )
