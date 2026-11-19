@@ -1,4 +1,4 @@
-# AGENTS.md — 給 Codex CLI 的專案規則
+# AGENTS.md — 給 AI 開發助手的專案規則
 
 ## 專案
 Flask 醫療耗材庫存管理系統（ERP 庫存模組）。網頁 + REST API 共用同一套商業邏輯。
