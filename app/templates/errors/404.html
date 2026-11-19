@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card center">
+  <h1>404 找不到頁面</h1>
+  <p class="muted">網址可能打錯，或資料已被刪除。</p>
+  <a class="btn" href="{{ url_for('items.dashboard') }}">回首頁</a>
+</div>
+{% endblock %}

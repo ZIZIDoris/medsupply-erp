@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}註冊｜醫療耗材庫存管理{% endblock %}
+{% block content %}
+<div class="auth-card">
+  <h1>註冊</h1>
+  {% if errors._ %}<div class="alert alert-danger">{{ errors._ }}</div>{% endif %}
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>帳號
+      <input name="username" value="{{ form.username or '' }}" required>
+      {% if errors.username %}<span class="field-error">{{ errors.username }}</span>{% endif %}
+    </label>
+    <label>顯示名稱<input name="display_name" value="{{ form.display_name or '' }}"></label>
+    <label>密碼（至少 8 碼）
+      <input name="password" type="password" required>
+      {% if errors.password %}<span class="field-error">{{ errors.password }}</span>{% endif %}
+    </label>
+    <label>確認密碼
+      <input name="password_confirm" type="password" required>
+      {% if errors.password_confirm %}<span class="field-error">{{ errors.password_confirm }}</span>{% endif %}
+    </label>
+    <button class="btn btn-primary full">建立帳號</button>
+  </form>
+  <p class="muted">已有帳號？<a href="{{ url_for('auth.login') }}">登入</a></p>
+</div>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card center">
+  <h1>500 系統發生錯誤</h1>
+  <p>請將以下追蹤碼提供給系統管理員：</p>
+  <p><code class="big">{{ request_id }}</code></p>
+  <p class="muted small">管理員可用 <code>grep {{ request_id }} logs/app.log</code> 找到完整錯誤訊息。</p>
+  <a class="btn" href="{{ url_for('items.dashboard') }}">回首頁</a>
+</div>
+{% endblock %}

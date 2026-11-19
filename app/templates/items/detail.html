@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}{{ item.code }}｜醫療耗材庫存管理{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>{{ item.code }} {{ item.name }}</h1>
+  <div class="head-actions">
+    <a class="btn" href="{{ url_for('items.edit_item', item_id=item.id) }}">編輯</a>
+    {% if current_user.is_admin %}
+    <form method="post" action="{{ url_for('items.delete_item', item_id=item.id) }}" class="inline"
+          onsubmit="return confirm('確定刪除 {{ item.code }}？異動紀錄會一併刪除。');">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="btn btn-danger">刪除</button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+
+<div class="grid-2">
+  <section class="card">
+    <h2>基本資料</h2>
+    <dl class="kv">
+      <dt>分類</dt><dd>{{ item.category }}</dd>
+      <dt>目前庫存</dt><dd class="{{ 'warn' if item.is_low_stock }}"><strong>{{ "{:,}".format(item.quantity) }}</strong> {{ item.unit }}{% if item.is_low_stock %}（低於安全量）{% endif %}</dd>
+      <dt>安全庫存</dt><dd>{{ item.safety_stock }} {{ item.unit }}</dd>
+      <dt>單價</dt><dd>{{ "{:,.2f}".format(item.unit_price) }}</dd>
+      <dt>效期</dt><dd>{{ item.expiry_date or '—' }}{% if item.days_to_expiry is not none %}（{{ '已過期' if item.days_to_expiry < 0 else '剩 ' ~ item.days_to_expiry ~ ' 天' }}）{% endif %}</dd>
+      <dt>儲位</dt><dd>{{ item.location or '—' }}</dd>
+      <dt>建檔</dt><dd>{{ item.created_at.strftime('%Y-%m-%d %H:%M') }}{% if item.created_by %} by {{ item.created_by.display_name }}{% endif %}</dd>
+      <dt>最後修改</dt><dd>{{ item.updated_at.strftime('%Y-%m-%d %H:%M') }}</dd>
+    </dl>
+  </section>
+
+  <section class="card">
+    <h2>入庫 / 出庫</h2>
+    <form method="post" action="{{ url_for('items.stock_change', item_id=item.id) }}" class="form-grid">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label>類型
+        <select name="type"><option value="OUT">出庫（領用）</option><option value="IN">入庫（進貨）</option></select>
+      </label>
+      <label>數量<input name="quantity" type="number" min="1" required></label>
+      <label>單位 / 廠商<input name="department" placeholder="例：急診、5A 病房"></label>
+      <label>備註<input name="note"></label>
+      <div class="actions span-2"><button class="btn btn-primary">送出</button></div>
+    </form>
+  </section>
+</div>
+
+<section class="card flush">
+  <h2 class="pad">異動紀錄（最近 50 筆）</h2>
+  <table>
+    <thead><tr><th>時間</th><th>類型</th><th class="num">數量</th><th class="num">結存</th><th>單位</th><th>備註</th><th>經手人</th></tr></thead>
+    <tbody>
+    {% for t in transactions %}
+      <tr>
+        <td>{{ t.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+        <td><span class="pill {{ 'pill-in' if t.txn_type == 'IN' else 'pill-out' }}">{{ '入庫' if t.txn_type == 'IN' else '出庫' }}</span></td>
+        <td class="num">{{ '+' if t.txn_type == 'IN' else '−' }}{{ t.quantity }}</td>
+        <td class="num">{{ t.balance_after }}</td>
+        <td>{{ t.department or '—' }}</td>
+        <td>{{ t.note or '' }}</td>
+        <td>{{ t.user.display_name }}</td>
+      </tr>
+    {% else %}
+      <tr><td colspan="7" class="muted">尚無異動</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

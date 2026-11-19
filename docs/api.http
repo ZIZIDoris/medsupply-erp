@@ -1,0 +1,76 @@
+### 用 VS Code 的 REST Client 外掛開啟此檔，點每段上方的 "Send Request" 即可執行
+@base = http://127.0.0.1:5000/api/v1
+
+### 健康檢查
+GET {{base}}/health
+
+### 登入（回應裡的 token 會自動存到 login 變數）
+# @name login
+POST {{base}}/auth/login
+Content-Type: application/json
+
+{"username": "nurse01", "password": "nurse1234"}
+
+###
+@token = {{login.response.body.token}}
+
+### 低庫存清單
+GET {{base}}/items?low_stock=1
+Authorization: Bearer {{token}}
+
+### 搜尋
+GET {{base}}/items?q=口罩&page=1&per_page=10
+Authorization: Bearer {{token}}
+
+### 新增
+POST {{base}}/items
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "code": "MS-0401",
+  "name": "生理食鹽水 500ml",
+  "category": "其他",
+  "unit": "瓶",
+  "safety_stock": 100,
+  "unit_price": 25,
+  "expiry_date": "2027-06-30",
+  "location": "E-02-01",
+  "initial_quantity": 300
+}
+
+### 部分更新
+PATCH {{base}}/items/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"safety_stock": 250}
+
+### 出庫
+POST {{base}}/items/1/transactions
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"type": "OUT", "quantity": 20, "department": "急診", "note": "夜班請領"}
+
+### 故意出庫過量 → 409
+POST {{base}}/items/1/transactions
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"type": "OUT", "quantity": 999999}
+
+### 驗證錯誤 → 422
+POST {{base}}/items
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"code": "x", "unit_price": -5}
+
+### 統計
+GET {{base}}/stats/summary?expiry_days=60
+Authorization: Bearer {{token}}
+
+### 一般使用者刪除 → 403
+DELETE {{base}}/items/1
+Authorization: Bearer {{token}}

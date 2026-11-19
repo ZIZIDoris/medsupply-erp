@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}登入｜醫療耗材庫存管理{% endblock %}
+{% block content %}
+<div class="auth-card">
+  <h1>登入</h1>
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>帳號<input name="username" required autofocus autocomplete="username"></label>
+    <label>密碼<input name="password" type="password" required autocomplete="current-password"></label>
+    <label class="check"><input type="checkbox" name="remember" value="1"> 記住我</label>
+    <button class="btn btn-primary full">登入</button>
+  </form>
+  <p class="muted">還沒有帳號？<a href="{{ url_for('auth.register') }}">註冊</a></p>
+  <p class="muted small">測試帳號：admin / admin1234、nurse01 / nurse1234（需先執行 <code>flask seed</code>）</p>
+</div>
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-head">
+  <h1>庫存儀表板</h1>
+  <span class="muted small">資料時間 {{ summary.generated_at.replace('T', ' ') }}</span>
+</div>
+
+<section class="cards">
+  {% for c in summary.by_category %}
+  <div class="card stat">
+    <div class="stat-label">{{ c.category }}</div>
+    <div class="stat-value">{{ c.item_count }}<small> 品項</small></div>
+    <div class="muted small">庫存 {{ "{:,}".format(c.total_quantity) }}・金額 ${{ "{:,.0f}".format(c.stock_value) }}</div>
+  </div>
+  {% else %}
+  <div class="card">尚無資料，先 <a href="{{ url_for('items.create_item') }}">新增耗材</a> 或執行 <code>flask seed</code>。</div>
+  {% endfor %}
+</section>
+
+<div class="grid-2">
+  <section class="card">
+    <h2>低於安全庫存 <span class="pill pill-warn">{{ summary.low_stock|length }}</span></h2>
+    <table>
+      <thead><tr><th>料號</th><th>名稱</th><th class="num">現有</th><th class="num">安全量</th></tr></thead>
+      <tbody>
+      {% for i in summary.low_stock %}
+        <tr><td><a href="{{ url_for('items.item_detail', item_id=i.id) }}">{{ i.code }}</a></td><td>{{ i.name }}</td>
+            <td class="num warn">{{ i.quantity }}</td><td class="num">{{ i.safety_stock }}</td></tr>
+      {% else %}<tr><td colspan="4" class="muted">沒有低庫存品項</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+  <section class="card">
+    <h2>{{ summary.expiring_within_days }} 天內到期 <span class="pill pill-danger">{{ summary.expiring|length }}</span></h2>
+    <table>
+      <thead><tr><th>料號</th><th>名稱</th><th>效期</th><th class="num">剩餘天數</th></tr></thead>
+      <tbody>
+      {% for i in summary.expiring %}
+        <tr><td><a href="{{ url_for('items.item_detail', item_id=i.id) }}">{{ i.code }}</a></td><td>{{ i.name }}</td>
+            <td>{{ i.expiry_date }}</td>
+            <td class="num {{ 'danger' if i.days_to_expiry < 0 else 'warn' }}">{{ '已過期' if i.days_to_expiry < 0 else i.days_to_expiry }}</td></tr>
+      {% else %}<tr><td colspan="4" class="muted">沒有即將到期品項</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </section>
+</div>
+
+<section class="card">
+  <h2>近 {{ summary.usage_days }} 天各單位領用量</h2>
+  {% set max_q = (summary.usage_by_department|map(attribute='quantity')|max) if summary.usage_by_department else 1 %}
+  {% for u in summary.usage_by_department %}
+  <div class="bar-row">
+    <span class="bar-label">{{ u.department }}</span>
+    <span class="bar"><span style="width: {{ (u.quantity / max_q * 100)|round(1) }}%"></span></span>
+    <span class="bar-value">{{ "{:,}".format(u.quantity) }}（{{ u.transactions }} 筆）</span>
+  </div>
+  {% else %}<p class="muted">尚無領用紀錄</p>{% endfor %}
+</section>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}耗材清單｜醫療耗材庫存管理{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>耗材清單</h1>
+  <a class="btn btn-primary" href="{{ url_for('items.create_item') }}">＋ 新增耗材</a>
+</div>
+
+<form class="filters" method="get">
+  <input name="q" value="{{ q }}" placeholder="搜尋料號或名稱">
+  <select name="category">
+    <option value="">全部分類</option>
+    {% for c in CATEGORIES %}<option {{ 'selected' if c == category }}>{{ c }}</option>{% endfor %}
+  </select>
+  <label class="check"><input type="checkbox" name="low_stock" value="1" {{ 'checked' if low_stock }}> 只看低庫存</label>
+  <button class="btn">查詢</button>
+</form>
+
+<div class="card flush">
+<table>
+  <thead>
+    <tr><th>料號</th><th>名稱</th><th>分類</th><th class="num">庫存</th><th class="num">安全量</th><th class="num">單價</th><th>效期</th><th>儲位</th></tr>
+  </thead>
+  <tbody>
+  {% for item in pagination.items %}
+    <tr>
+      <td><a href="{{ url_for('items.item_detail', item_id=item.id) }}">{{ item.code }}</a></td>
+      <td>{{ item.name }}</td>
+      <td>{{ item.category }}</td>
+      <td class="num {{ 'warn' if item.is_low_stock }}">{{ "{:,}".format(item.quantity) }} {{ item.unit }}</td>
+      <td class="num">{{ item.safety_stock }}</td>
+      <td class="num">{{ "{:,.2f}".format(item.unit_price) }}</td>
+      <td class="{{ 'danger' if item.days_to_expiry is not none and item.days_to_expiry < 0 }}">{{ item.expiry_date or '—' }}</td>
+      <td>{{ item.location or '—' }}</td>
+    </tr>
+  {% else %}
+    <tr><td colspan="8" class="muted">查無資料</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+
+{% if pagination.pages > 1 %}
+<nav class="pager">
+  {% if pagination.has_prev %}<a href="{{ url_for('items.list_items', page=pagination.prev_num, q=q, category=category, low_stock='1' if low_stock else None) }}">‹ 上一頁</a>{% endif %}
+  <span>第 {{ pagination.page }} / {{ pagination.pages }} 頁（共 {{ pagination.total }} 筆）</span>
+  {% if pagination.has_next %}<a href="{{ url_for('items.list_items', page=pagination.next_num, q=q, category=category, low_stock='1' if low_stock else None) }}">下一頁 ›</a>{% endif %}
+</nav>
+{% else %}
+<p class="muted small">共 {{ pagination.total }} 筆</p>
+{% endif %}
+{% endblock %}
