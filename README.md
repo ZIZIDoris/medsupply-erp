@@ -65,8 +65,7 @@ medsupply-erp/
 ├── migrations/            # 資料庫版本（Alembic）
 ├── tests/                 # pytest
 ├── docs/
-│   ├── 白話版說明.md      # 新手版：用生活比喻解釋整個系統（建議先看這份）
-│   ├── 面試說明.md        # 技術版：連線 / API / 改欄位 / 除錯 的完整說明與模擬問答
+│   │   
 │   └── api.http           # 可直接在 VS Code REST Client 執行的 API 範例
 └── AGENTS.md              # 給 Codex CLI 讀的專案規則
 ```
@@ -134,8 +133,7 @@ pip install PyMySQL
 DATABASE_URL=mysql+pymysql://user:pass@localhost:3306/medsupply?charset=utf8mb4
 ```
 
-程式碼完全不用改，詳細原理見 [docs/面試說明.md](docs/面試說明.md)。
-
+程式碼完全不用改
 ---
 
 ## 用 Codex CLI 繼續擴充
