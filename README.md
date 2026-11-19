@@ -145,7 +145,7 @@ medsupply-erp/
 ├── docs/
 │   │   
 │   └── api.http           # 可直接在 VS Code REST Client 執行的 API 範例
-└── AGENTS.md              # 給 Codex CLI 讀的專案規則
+└── AGENTS.md              # 給 AI 開發助手的專案規則
 ```
 
 ---
@@ -235,14 +235,12 @@ DATABASE_URL=mysql+pymysql://user:pass@localhost:3306/medsupply?charset=utf8mb4
 
 ---
 
-## 用 Codex CLI 繼續擴充
+## 未來規劃
 
-專案根目錄的 `AGENTS.md` 寫好了架構規則，Codex CLI 啟動時會自動讀取。可以拿這些題目練習（建議先自己想要改哪些檔案，再讓 Codex 做，最後對照差異）：
-
-1. 「在 Item 新增 `manufacturer`（廠商，選填，最多 100 字）欄位，網頁表單、API、驗證、測試都要更新，並產生 migration」
-2. 「新增 `GET /api/v1/items/export.csv`，匯出目前搜尋條件下的耗材清單」
-3. 「新增稽核紀錄表 audit_logs，記錄誰在什麼時間修改了哪個欄位、舊值與新值」
-4. 「把刪除改成軟刪除（is_active 欄位），列表預設不顯示停用品項」
-5. 「新增 `GET /api/v1/stats/daily-usage?days=90`，回傳每日出庫量時間序列」
-
-每做完一題都執行 `pytest`，確認沒有破壞既有功能。
+- [x] 耗材新增「廠商」欄位
+- [ ] **匯出 CSV**：`GET /api/v1/items/export.csv`，依目前的搜尋條件匯出耗材清單
+- [ ] **稽核紀錄**：新增 `audit_logs` 資料表，記錄誰在何時修改了哪個欄位，以及修改前後的值
+- [ ] **軟刪除**：以 `is_active` 欄位停用品項，保留歷史資料
+- [ ] **用量時間序列**：`GET /api/v1/stats/daily-usage?days=90`，提供每日出庫量，供分析與補貨預測使用
+- [ ] **測試環境**：在 CI 上使用 PostgreSQL 執行自動化測試
+- [ ] **部署**：以 Docker 打包，搭配 gunicorn + Nginx
