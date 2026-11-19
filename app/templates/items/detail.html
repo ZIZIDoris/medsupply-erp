@@ -25,6 +25,7 @@
       <dt>單價</dt><dd>{{ "{:,.2f}".format(item.unit_price) }}</dd>
       <dt>效期</dt><dd>{{ item.expiry_date or '—' }}{% if item.days_to_expiry is not none %}（{{ '已過期' if item.days_to_expiry < 0 else '剩 ' ~ item.days_to_expiry ~ ' 天' }}）{% endif %}</dd>
       <dt>儲位</dt><dd>{{ item.location or '—' }}</dd>
+      <dt>廠商</dt><dd>{{ item.manufacturer or '—' }}</dd>
       <dt>建檔</dt><dd>{{ item.created_at.strftime('%Y-%m-%d %H:%M') }}{% if item.created_by %} by {{ item.created_by.display_name }}{% endif %}</dd>
       <dt>最後修改</dt><dd>{{ item.updated_at.strftime('%Y-%m-%d %H:%M') }}</dd>
     </dl>

@@ -139,6 +139,10 @@ def clean_item_data(data, partial=False):
         cleaned["location"] = (
             None if _is_blank(data["location"]) else str(data["location"]).strip()[:50]
         )
+    if "manufacturer" in data:
+        cleaned["manufacturer"] = (
+            None if _is_blank(data["manufacturer"]) else str(data["manufacturer"]).strip()[:100]
+        )
 
     # 庫存量不允許直接修改，要走入出庫
     if "quantity" in data:

@@ -146,3 +146,22 @@ def test_unexpected_error_returns_request_id(app, client, staff_headers, monkeyp
     resp = client.get("/api/v1/stats/summary", headers={**staff_headers, "X-Request-ID": "trace-123"})
     assert resp.status_code == 500
     assert resp.get_json()["error"]["request_id"] == "trace-123"
+
+
+def test_manufacturer(client, staff_headers, sample_item):
+    """廠商欄位：可以新增、修改、清空，而且不會被其他欄位的值蓋掉"""
+    url = f"/api/v1/items/{sample_item['id']}"
+
+    # 1. 同時送出儲位和廠商，確認兩個值各自存對（專門抓「複製貼上漏改」的錯誤）
+    resp = client.patch(
+        url, headers=staff_headers,
+        json={"location": "A-01-01", "manufacturer": "台灣醫材公司"},
+    )
+    assert resp.status_code == 200
+    body = resp.get_json()
+    assert body["manufacturer"] == "台灣醫材公司"
+    assert body["location"] == "A-01-01"
+
+    # 2. 清空廠商，應該變成 None（沒有值）
+    resp = client.patch(url, headers=staff_headers, json={"manufacturer": ""})
+    assert resp.get_json()["manufacturer"] is None

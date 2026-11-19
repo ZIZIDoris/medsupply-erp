@@ -64,6 +64,7 @@ class Item(db.Model):
     unit_price = db.Column(db.Numeric(10, 2), nullable=False, default=0)
     expiry_date = db.Column(db.Date)
     location = db.Column(db.String(50))  # 儲位，例如 A-01-03
+    manufacturer = db.Column(db.String(100))  # 廠商
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.now)
     updated_at = db.Column(
         db.DateTime, nullable=False, default=datetime.now, onupdate=datetime.now
@@ -103,6 +104,7 @@ class Item(db.Model):
             "unit_price": float(self.unit_price or 0),
             "expiry_date": self.expiry_date.isoformat() if self.expiry_date else None,
             "location": self.location,
+            "manufacturer": self.manufacturer,
             "is_low_stock": self.is_low_stock,
             "days_to_expiry": self.days_to_expiry,
             "created_at": self.created_at.isoformat(timespec="seconds"),

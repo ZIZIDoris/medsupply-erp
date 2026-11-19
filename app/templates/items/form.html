@@ -36,6 +36,7 @@
 
   <label>效期<input name="expiry_date" type="date" value="{{ val('expiry_date') }}">{{ err('expiry_date') }}</label>
   <label>儲位<input name="location" value="{{ val('location') }}" placeholder="A-01-03">{{ err('location') }}</label>
+  <label>廠商<input name="manufacturer" value="{{ val('manufacturer') }}" placeholder="例：台灣醫材公司">{{ err('manufacturer') }}</label>
 
   {% if not item %}
   <label>期初庫存量<input name="initial_quantity" type="number" min="0" value="{{ val('initial_quantity') or 0 }}">
