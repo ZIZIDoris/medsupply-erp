@@ -18,7 +18,8 @@ class User(UserMixin, db.Model):
 
     __tablename__ = "users"
 
-    id = db.Column(db.Integer, primary_key=True)
+    # Identity()：讓 Oracle 建成 IDENTITY 自動編號（PostgreSQL 同樣適用，SQLite 會忽略）
+    id = db.Column(db.Integer, db.Identity(), primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False, index=True)
     # 密碼只存雜湊值（PBKDF2 / scrypt），絕不存明碼
     password_hash = db.Column(db.String(256), nullable=False)
@@ -51,7 +52,8 @@ class Item(db.Model):
 
     __tablename__ = "items"
 
-    id = db.Column(db.Integer, primary_key=True)
+    # Identity()：讓 Oracle 建成 IDENTITY 自動編號（PostgreSQL 同樣適用，SQLite 會忽略）
+    id = db.Column(db.Integer, db.Identity(), primary_key=True)
     # 料號：業務上的唯一鍵，例如 MS-0001
     code = db.Column(db.String(30), unique=True, nullable=False, index=True)
     name = db.Column(db.String(100), nullable=False)
@@ -123,7 +125,8 @@ class StockTransaction(db.Model):
     TYPE_IN = "IN"
     TYPE_OUT = "OUT"
 
-    id = db.Column(db.Integer, primary_key=True)
+    # Identity()：讓 Oracle 建成 IDENTITY 自動編號（PostgreSQL 同樣適用，SQLite 會忽略）
+    id = db.Column(db.Integer, db.Identity(), primary_key=True)
     item_id = db.Column(
         db.Integer, db.ForeignKey("items.id"), nullable=False, index=True
     )

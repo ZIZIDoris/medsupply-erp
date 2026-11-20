@@ -6,6 +6,8 @@ python-dotenv>=1.0
 pytest>=8.0
 # PostgreSQL 驅動（預設資料庫）
 psycopg[binary]==3.3.9
+# Oracle 驅動（Thin 模式，不需安裝 Oracle Instant Client）
+oracledb==26.1.0
 # 換其他資料庫時再加裝對應驅動：
 # PyMySQL        -> MySQL / MariaDB
 # pyodbc         -> SQL Server

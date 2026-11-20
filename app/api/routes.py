@@ -21,7 +21,7 @@ REST API（前綴 /api/v1）
 import logging
 
 from flask import Blueprint, current_app, g, jsonify, request, url_for
-from sqlalchemy import text
+from sqlalchemy import literal_column, select
 
 from .. import services
 from ..errors import AuthError, ValidationError
@@ -43,7 +43,8 @@ def _json_body():
 @bp.get("/health")
 def health():
     # 實際對資料庫下一句 SELECT 1，確認連線正常
-    db.session.execute(text("SELECT 1"))
+    # 用 select() 而非原生 SQL：Oracle 會自動補成 SELECT 1 FROM DUAL
+    db.session.execute(select(literal_column("1")))
     return {"status": "ok", "database": db.engine.dialect.name}
 
 
